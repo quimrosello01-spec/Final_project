@@ -52,7 +52,7 @@ class Place:
     
     def update_occupancy(self):
         # Compute mean rate for the area:
-        area_rates = [p.rate for p in self.city.places if p.area == self.area]
+        area_rates = [p.rate for p in self.city.place.values() if p.area == self.area]
         mean_rate = sum(area_rates)/len(area_rates)
 
         if self.rate > mean_rate:

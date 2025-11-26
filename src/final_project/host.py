@@ -8,14 +8,14 @@ class Host:
 
     def update_profits(self):
         for pid in self.assets:
-            place = self.city.places[pid]
+            place = self.city.place[pid]
             self.profits += place.rate * place.occupancy
 
     def make_bids(self):
         opportunities = set()
 
         for pid in self.assets:
-            place = self.city.places[pid]
+            place = self.city.place[pid]
             for neigh in place.neighbours:
                 if neigh not in self.assets:
                     opportunities.add(neigh)
@@ -23,7 +23,7 @@ class Host:
         bids = []
 
         for pid in opportunities:
-            place = self.city.places[pid]
+            place = self.city.place[pid]
             latest_step = max(place.price.keys())
             ask_price = place.price[latest_step]
 

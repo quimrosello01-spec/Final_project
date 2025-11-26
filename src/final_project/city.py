@@ -12,25 +12,41 @@ class City:
         self.area_rates = area_rates
         self.step = 0
 
+        # Grid-related structures
+        self.grid_size = size
+        self.grid = [[None for _ in range(size)] for _ in range(size)]
+        self.positions = {}
+
         self.place: Dict[int, Place] = {}
         self.hosts: Dict[int, Host] = {}
 
     def initialize(self) -> None:
-        num_places = self.size * self.size
+        index = 0
+        for r in range(self.grid_size):
+            for c in range(self.grid_size):
+                self.grid[r][c] = index
+                self.positions[index] = (r, c)
+                index += 1
+        num_place = self.size * self.size
 
-        for place_id in range(num_places):
+        for place_id in range(num_place):
             host_id = place_id
             place = Place(place_id=place_id, host_id=host_id, city=self)
-            self.places[place_id]=place
+            self.place[place_id]=place
 
-        for place in self.places.values():
+        # Initialize place area, rate, neighbours, prices
+        for place in self.place.values():
+             place.setup()
+
+        for place in self.place.values():
+            host_id = place.host_id
             host = Host(host_id=host_id, place=place, city=self)
             self.hosts[host_id] = host
         
     def approve_bids(self, bids: List[dict]) -> List[dict]:
         if not bids:
             return []
-        df = pd.Dataframe(bids)
+        df = pd.DataFrame(bids)
         df = df.sort_values("spread", ascending=False)
 
         approved = []
@@ -39,7 +55,7 @@ class City:
 
         for _, row in df.iterrows():
             place_id = int(row["place_id"])
-            buyer_id = int(row[buyer_id])
+            buyer_id = int(row["buyer_id"])
 
             if buyer_id in used_buyers or place_id in used_places:
                 continue
@@ -57,7 +73,7 @@ class City:
             seller_id = int(tx["seller_id"])
             bid_price = float(tx["bid_price"])
 
-            place = self.places[place_id]
+            place = self.place[place_id]
             buyer = self.hosts[buyer_id]
             seller = self.hosts[seller_id]
 
@@ -89,7 +105,7 @@ class City:
     def iterate(self) -> List[dict]:
         self.step += 1
 
-        for place in self.places.values():
+        for place in self.place.values():
             place.update_occupancy()
         
         for host in self.hosts.values():
@@ -97,3 +113,16 @@ class City:
         
         transactions = self.clear_market()
         return transactions
+
+    def compute_wealths(self):
+        wealths = {}
+        for host in self.hosts.values():
+            asset_value = 0
+            for pid in host.assets:
+                p = self.place[pid]
+                last_price = p.price[max(p.price.keys())]
+                asset_value += last_price
+
+            wealths[host.host_id] = host.profits + asset_value
+
+        return wealths
