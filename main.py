@@ -12,9 +12,7 @@ area_rates = {
 }
 
 
-# -------------------------------------------------------
-# GINI COEFFICIENT
-# -------------------------------------------------------
+# Gini
 def compute_gini(values):
     """Compute the Gini coefficient from a list of wealth values."""
     if len(values) == 0:
@@ -36,16 +34,12 @@ def compute_gini(values):
     return max(0, min(gini, 1))
 
 
-# -------------------------------------------------------
-# RUN SIMULATION — logs Gini over time
-# -------------------------------------------------------
+# Simulation
 def run_simulation(modify_rules=False):
     city = City(size=10, area_rates=area_rates)
     city.initialize()
 
-    # -----------------------------------------
-    # RULE MODIFICATION (Bidding strategy)
-    # -----------------------------------------
+    # Modification
     if modify_rules:
 
         for host in city.hosts.values():
@@ -56,19 +50,14 @@ def run_simulation(modify_rules=False):
                 bids = original_make_bids()
                 for b in bids:
 
-                    # ORIGINAL RULE (kept for reference)
-                    # b["bid_price"] = self.profits
-
-                    # MODIFIED RULE
+                    # Modified Rule
                     b["bid_price"] = 0.7 * self.profits
 
                 return bids
 
             host.make_bids = modified_bids.__get__(host, host.__class__)
 
-    # -----------------------------------------
-    # Simulation loop: track Gini
-    # -----------------------------------------
+    # Simulation loop
     steps = 180  # 15 years = 180 months
     gini_history = []
 
@@ -84,9 +73,7 @@ def run_simulation(modify_rules=False):
     return gini_history
 
 
-# -------------------------------------------------------
-# GRAPH 1: Wealth distribution (unchanged)
-# -------------------------------------------------------
+# Graph 1
 def graph1(city):
     wealths = city.compute_wealths()
 
@@ -116,9 +103,7 @@ def graph1(city):
     plt.close()
 
 
-# -------------------------------------------------------
-# GRAPH 2: Gini over time
-# -------------------------------------------------------
+# Graph 2
 def graph2(gini_history, filename, label):
     plt.figure(figsize=(12, 6))
     plt.plot(gini_history, label=label)
@@ -133,9 +118,7 @@ def graph2(gini_history, filename, label):
     plt.close()
 
 
-# -------------------------------------------------------
-# MAIN
-# -------------------------------------------------------
+# Main
 def main():
 
     # Run original rules
