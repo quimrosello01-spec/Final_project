@@ -38,3 +38,4 @@ class Host:
                 bids.append(bid)
 
         return bids
+
